@@ -51,7 +51,6 @@ func (repo *MySQLUserAccountRepository) FindAndValidateUserAccount(userName stri
 		return nil, err
 	}
 
-	// Verificar si la cuenta está activa
 	if user.Status != 7 || startDate.After(time.Now()) || caducityDate.Before(time.Now()) {
 		return nil, ErrInactiveAccount
 	}

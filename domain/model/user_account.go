@@ -9,8 +9,8 @@ type UserAccount struct {
 	Username       string    `json:"userName"`
 	Password       string    `json:"password"`
 	Email          string    `json:"email"`
-	StartDate      time.Time `json:"start_date"`
-	CaducityDate   time.Time `json:"expired_at"` // Fecha de expiración
+	StartDate      time.Time `json:"startDate"`
+	CaducityDate   time.Time `json:"caducity_Date"`
 	Status         int       `json:"status"`
 	ChangePassword bool      `json:"changePassword"`
 }

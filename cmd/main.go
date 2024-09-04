@@ -12,6 +12,7 @@ import (
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 )
 
 func main() {
@@ -45,6 +46,14 @@ func main() {
 
 	// Configurar el servidor y las rutas
 	app := fiber.New()
+
+	// Configurar CORS
+	app.Use(cors.New(cors.Config{
+		AllowOrigins: "*", // Puedes especificar dominios específicos si lo prefieres
+		AllowMethods: "GET,POST,HEAD,PUT,DELETE,OPTIONS",
+		AllowHeaders: "Content-Type, Authorization",
+	}))
+
 	http.SetupRoutes(app, authHandler)
 
 	// Iniciar el servidor
