@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"time"
+	"unap-auth/domain/model"
 	"unap-auth/domain/repository"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -36,4 +37,12 @@ func (a *AuthUsecase) Authenticate(userName string, password string) (string, er
 	}
 
 	return signedToken, nil
+}
+
+func (a *AuthUsecase) GetRoles(userAccountId string) ([]model.Role, error) {
+	return a.UserAccountRepo.GetRoles(userAccountId)
+}
+
+func (a *AuthUsecase) GetModulesByRole(roleId string) ([]model.Module, error) {
+	return a.UserAccountRepo.GetModulesByRole(roleId)
 }

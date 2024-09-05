@@ -54,7 +54,7 @@ func main() {
 		AllowHeaders: "Content-Type, Authorization",
 	}))
 
-	http.SetupRoutes(app, authHandler)
+	http.SetupRoutes(app, authHandler, cfg)
 
 	// Iniciar el servidor
 	if err := app.Listen(":3500"); err != nil {
