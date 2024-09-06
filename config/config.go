@@ -10,7 +10,7 @@ type Config struct {
 }
 
 func LoadConfig() (*Config, error) {
-	dsn := "linox:linox123***@tcp(38.43.133.27:3306)/unap.core"
+	dsn := "root:@tcp(localhost:3306)/unap.core"
 	if dsn == "" {
 		log.Fatal("DATABASE_DSN environment variable is not set")
 	}
