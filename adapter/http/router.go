@@ -22,4 +22,8 @@ func SetupRoutes(app *fiber.App, authHandler *AuthHandler, cfg *config.Config) {
 
 	app.Get("/auth/modules/:role_id", authHandler.GetModules)
 
+	app.Post("/auth/authorize", authHandler.AuthorizeToken)
+
+	app.Get("/auth/validate-token", authHandler.ValidateToken)
+
 }

@@ -17,6 +17,7 @@ var (
 	ErrUserNotFound    = errors.New("user account not found")
 	ErrInvalidPassword = errors.New("username or password is incorrect")
 	ErrInactiveAccount = errors.New("user account is inactive")
+	ErrorUnauthorized  = errors.New("Unauthorized")
 )
 
 func (repo *MySQLUserAccountRepository) FindAndValidateUserAccount(userName string, password string) (*model.UserAccount, error) {
@@ -125,4 +126,46 @@ func (repo *MySQLUserAccountRepository) GetModulesByRole(roleId string) ([]model
 	}
 
 	return modules, nil
+}
+
+func (repo *MySQLUserAccountRepository) AuthorizeToken(userAccountId string, roleId string, moduleId string) (*model.AuthorizeTokenClaims, error) {
+	query := `
+		SELECT cr.Id
+		FROM core_roles cr
+		INNER JOIN core_behavior cb ON cb.RoleId = cr.Id
+		WHERE cb.UserAccountId = ? AND cr.Id = ? AND cr.Status = 7 
+	`
+
+	//validar que el usuario tenga el rol, si no, retornar error con el mensaje "No autorizado"
+	row := repo.DB.QueryRow(query, userAccountId, roleId)
+	if err := row.Scan(&roleId); err != nil {
+		return nil, ErrorUnauthorized
+	}
+
+	//validar que el modulo pertenezca al rol, si no, retornar error con el mensaje "No autorizado"
+	query = `
+		SELECT cm.Id
+		FROM core_modules cm
+		JOIN core_resources cr ON cr.ResourceId = cm.Id
+		JOIN core_roleaccesses cra ON cra.ResourceId = cr.Id
+		WHERE cra.RoleId = ? AND cm.Id = ? AND cr.ResourceParentId IS NULL AND cm.Status = 7;`
+
+	row = repo.DB.QueryRow(query, roleId, moduleId)
+	if err := row.Scan(&moduleId); err != nil {
+		return nil, ErrorUnauthorized
+	}
+
+	//generar el token con el modulo y el rol
+	tokenClaims := model.AuthorizeTokenClaims{
+		UserAccountId: userAccountId,
+		RoleId:        roleId,
+		ModuleId:      moduleId,
+	}
+
+	return &tokenClaims, nil
+
+}
+
+func (repo *MySQLUserAccountRepository) ValidateToken(token string) (bool, error) {
+	return true, nil
 }

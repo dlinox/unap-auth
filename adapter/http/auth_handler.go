@@ -72,3 +72,50 @@ func (h *AuthHandler) GetModules(c *fiber.Ctx) error {
 
 	return JSONResponse(c, fiber.StatusOK, "success", modules, "Modules retrieved successfully", nil)
 }
+
+// const response = await http(token).post(`/auth/authorize`, data);
+func (h *AuthHandler) AuthorizeToken(c *fiber.Ctx) error {
+
+	var req struct {
+		RoleId   string `json:"roleId"`
+		ModuleId string `json:"moduleId"`
+	}
+
+	if err := c.BodyParser(&req); err != nil {
+		return JSONResponse(c, fiber.StatusBadRequest, "error", nil, "Invalid request body", nil)
+	}
+
+	// Extraer el user_id del contexto
+	userAccountId, ok := c.Locals("uaid").(string)
+
+	if !ok {
+		return JSONResponse(c, fiber.StatusUnauthorized, "error", nil, "Invalid token payload", nil)
+	}
+
+	// Llamar al caso de uso para obtener los roles del usuario
+	token, err := h.AuthUsecase.AuthorizeToken(userAccountId, req.RoleId, req.ModuleId)
+	if err != nil {
+		return JSONResponse(c, fiber.StatusInternalServerError, "error", nil, "Could not authorize token", err.Error())
+	}
+	return JSONResponse(c, fiber.StatusOK, "success", token, "Token authorized successfully", nil)
+}
+
+// validateToken
+func (h *AuthHandler) ValidateToken(c *fiber.Ctx) error {
+
+	authorization := c.Get("Authorization")
+
+	if authorization == "" {
+		return JSONResponse(c, fiber.StatusUnauthorized, "error", nil, "No token provided", nil)
+	}
+
+	token := authorization[7:]
+
+	valid := h.AuthUsecase.ValidateToken(token)
+
+	if !valid {
+		return JSONResponse(c, fiber.StatusUnauthorized, "error", token, "Invalid token", nil)
+	}
+
+	return JSONResponse(c, fiber.StatusOK, "success", nil, "Token is valid", nil)
+}
