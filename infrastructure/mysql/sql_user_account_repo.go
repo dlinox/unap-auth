@@ -131,7 +131,7 @@ func (repo *MySQLUserAccountRepository) GetModulesByRole(roleId string) ([]model
 func (repo *MySQLUserAccountRepository) AuthorizeToken(userAccountId string, roleId string, moduleId string) (*model.AuthorizeTokenClaims, error) {
 	query := `
 		SELECT cr.Id
-		FROM Core_roles cr
+		FROM Core_Roles cr
 		INNER JOIN Core_Behavior cb ON cb.RoleId = cr.Id
 		WHERE cb.UserAccountId = ? AND cr.Id = ? AND cr.Status = 7 
 	`
@@ -145,8 +145,8 @@ func (repo *MySQLUserAccountRepository) AuthorizeToken(userAccountId string, rol
 	//validar que el modulo pertenezca al rol, si no, retornar error con el mensaje "No autorizado"
 	query = `
 		SELECT cm.Id
-		FROM Core_modules cm
-		JOIN Core_esources cr ON cr.ResourceId = cm.Id
+		FROM Core_Modules cm
+		JOIN Core_Resources cr ON cr.ResourceId = cm.Id
 		JOIN Core_RoleAccesses cra ON cra.ResourceId = cr.Id
 		WHERE cra.RoleId = ? AND cm.Id = ? AND cr.ResourceParentId IS NULL AND cm.Status = 7;`
 
@@ -174,7 +174,7 @@ func (repo *MySQLUserAccountRepository) AuthMiddleware(roleId string) (string, e
 
 	query := `
 		SELECT GROUP_CONCAT(ac.Id) AS permissions
-		FROM Core_Roleaccesses ro
+		FROM Core_RoleAccesses ro
 		JOIN Core_Resources ac ON ac.Id = ro.ResourceId
 		WHERE ro.RoleId = ?
 		GROUP BY ro.RoleId;
