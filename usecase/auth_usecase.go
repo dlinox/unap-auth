@@ -91,3 +91,39 @@ func (a *AuthUsecase) ValidateToken(tokenString string) bool {
 
 	return false
 }
+
+func (a *AuthUsecase) AuthMiddleware(tokenString string) (*model.Auth, error) {
+
+	// ParseToken parses and validates the JWT token
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		// Verificar que el método de firma del token es HMAC
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, nil
+		}
+		return []byte(a.JwtSecret), nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	// Verificar si el token es válido
+	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+
+		permissions, err := a.UserAccountRepo.AuthMiddleware(claims["rid"].(string))
+
+		auth := &model.Auth{
+			UserAccountId: claims["uaid"].(string),
+			RoleId:        claims["rid"].(string),
+			ModuleId:      claims["mid"].(string),
+			Permissions:   permissions,
+		}
+		if err != nil {
+			return nil, err
+		}
+
+		return auth, nil
+
+	}
+	return nil, nil
+}

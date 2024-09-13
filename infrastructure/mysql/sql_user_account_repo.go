@@ -169,3 +169,26 @@ func (repo *MySQLUserAccountRepository) AuthorizeToken(userAccountId string, rol
 func (repo *MySQLUserAccountRepository) ValidateToken(token string) (bool, error) {
 	return true, nil
 }
+
+func (repo *MySQLUserAccountRepository) AuthMiddleware(roleId string) (string, error) {
+
+	query := `
+		SELECT GROUP_CONCAT(ac.Id) AS permissions
+		FROM core_roleaccesses ro
+		JOIN core_resources ac ON ac.Id = ro.ResourceId
+		WHERE ro.RoleId = ?
+		GROUP BY ro.RoleId;
+	`
+
+	row := repo.DB.QueryRow(query, roleId)
+
+	var permissions string
+
+	err := row.Scan(&permissions)
+	if err != nil {
+		return "", err
+	}
+
+	return permissions, nil
+
+}

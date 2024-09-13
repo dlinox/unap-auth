@@ -26,4 +26,6 @@ func SetupRoutes(app *fiber.App, authHandler *AuthHandler, cfg *config.Config) {
 
 	app.Get("/auth/validate-token", authHandler.ValidateToken)
 
+	app.Get("/auth/auth-middleware", authHandler.AuthMiddleware)
+
 }

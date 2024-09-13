@@ -8,4 +8,5 @@ type UserAccountRepository interface {
 	GetModulesByRole(roleId string) ([]model.Module, error)
 	AuthorizeToken(userAccountId string, roleId string, moduleId string) (*model.AuthorizeTokenClaims, error)
 	ValidateToken(token string) (bool, error)
+	AuthMiddleware(roleId string) (string, error)
 }

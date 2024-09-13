@@ -119,3 +119,26 @@ func (h *AuthHandler) ValidateToken(c *fiber.Ctx) error {
 
 	return JSONResponse(c, fiber.StatusOK, "success", nil, "Token is valid", nil)
 }
+
+func (h *AuthHandler) AuthMiddleware(c *fiber.Ctx) error {
+
+	authorization := c.Get("Authorization")
+
+	if authorization == "" {
+		return JSONResponse(c, fiber.StatusUnauthorized, "error", nil, "No token provided", nil)
+	}
+
+	token := authorization[7:]
+
+	if token == "" {
+		return JSONResponse(c, fiber.StatusUnauthorized, "error", nil, "No token provided", nil)
+	}
+
+	auth, err := h.AuthUsecase.AuthMiddleware(token)
+
+	if err != nil {
+		return JSONResponse(c, fiber.StatusUnauthorized, "error", nil, "Invalid token", nil)
+	}
+
+	return JSONResponse(c, fiber.StatusOK, "success", auth, "Token is valid", nil)
+}
