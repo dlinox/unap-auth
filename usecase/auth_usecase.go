@@ -58,6 +58,7 @@ func (a *AuthUsecase) AuthorizeToken(userAccountId string, roleId string, module
 		"uaid": tokenClaims.UserAccountId,
 		"rid":  tokenClaims.RoleId,
 		"mid":  tokenClaims.ModuleId,
+		"bid":  tokenClaims.BehaviorId,
 		"exp":  time.Now().Add(time.Hour * 2).Unix(),
 	})
 
@@ -116,6 +117,7 @@ func (a *AuthUsecase) AuthMiddleware(tokenString string) (*model.Auth, error) {
 			UserAccountId: claims["uaid"].(string),
 			RoleId:        claims["rid"].(string),
 			ModuleId:      claims["mid"].(string),
+			BehaviorId:    claims["bid"].(string),
 			Permissions:   permissions,
 		}
 		if err != nil {

@@ -129,16 +129,16 @@ func (repo *MySQLUserAccountRepository) GetModulesByRole(roleId string) ([]model
 }
 
 func (repo *MySQLUserAccountRepository) AuthorizeToken(userAccountId string, roleId string, moduleId string) (*model.AuthorizeTokenClaims, error) {
-	query := `
-		SELECT cr.Id
-		FROM Core_Roles cr
-		INNER JOIN Core_Behavior cb ON cb.RoleId = cr.Id
-		WHERE cb.UserAccountId = ? AND cr.Id = ? AND cr.Status = 7 
-	`
 
+	behaviorId := ""
+	query := `
+		SELECT Id
+		FROM Core_Behavior
+		WHERE UserAccountId = ? AND RoleId = ? AND Status = 7 
+	`
 	//validar que el usuario tenga el rol, si no, retornar error con el mensaje "No autorizado"
-	row := repo.DB.QueryRow(query, userAccountId, roleId)
-	if err := row.Scan(&roleId); err != nil {
+	rowBehavior := repo.DB.QueryRow(query, userAccountId, roleId)
+	if err := rowBehavior.Scan(&behaviorId); err != nil {
 		return nil, ErrorUnauthorized
 	}
 
@@ -150,7 +150,7 @@ func (repo *MySQLUserAccountRepository) AuthorizeToken(userAccountId string, rol
 		JOIN Core_RoleAccesses cra ON cra.ResourceId = cr.Id
 		WHERE cra.RoleId = ? AND cm.Id = ? AND cr.ResourceParentId IS NULL AND cm.Status = 7;`
 
-	row = repo.DB.QueryRow(query, roleId, moduleId)
+	row := repo.DB.QueryRow(query, roleId, moduleId)
 	if err := row.Scan(&moduleId); err != nil {
 		return nil, ErrorUnauthorized
 	}
@@ -160,6 +160,7 @@ func (repo *MySQLUserAccountRepository) AuthorizeToken(userAccountId string, rol
 		UserAccountId: userAccountId,
 		RoleId:        roleId,
 		ModuleId:      moduleId,
+		BehaviorId:    behaviorId,
 	}
 
 	return &tokenClaims, nil
